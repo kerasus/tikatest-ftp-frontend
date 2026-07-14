@@ -1,0 +1,4 @@
+<template>
+  تینا رز
+</template>
+
