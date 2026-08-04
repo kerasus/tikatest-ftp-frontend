@@ -1,9 +1,7 @@
 <template>
   <div class="q-pa-md">
     <template v-if="loading">
-      <div>
-        در حال گرفتن اطلاعات...
-      </div>
+      <div>در حال گرفتن اطلاعات...</div>
       <q-spinner :thickness="10" />
     </template>
     <q-tree
@@ -44,7 +42,6 @@
             @click.stop="refreshDirectory(prop.node)">
             <q-tooltip>پاک کردن کش این پوشه</q-tooltip>
           </q-btn>
-
 
           <div class="text-weight-bold text-body1">
             {{ prop.node.label }}
@@ -100,6 +97,16 @@
               flat
               dense
               round
+              icon="content_copy"
+              color="primary"
+              class="q-ml-auto"
+              @click.stop="copyFileUrl(prop.node.path)">
+              <q-tooltip>کپی لینک فایل</q-tooltip>
+            </q-btn>
+            <q-btn
+              flat
+              dense
+              round
               icon="play_circle_filled"
               color="primary"
               :loading="prop.node.loading"
@@ -143,7 +150,7 @@
             controls
             autoplay
             class="full-width full-height"
-            style="max-height: 100%; object-fit: contain;">
+            style="max-height: 100%; object-fit: contain">
             مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
           </video>
         </q-card-section>
@@ -158,16 +165,16 @@ import { useQuasar } from 'quasar'
 import FileAPI from 'src/repositories/file'
 
 interface TreeNode {
-  id: string
-  label: string
-  path: string
-  type: 'directory' | 'file'
-  size?: number
-  children?: TreeNode[]
-  lazy?: boolean
-  editable?: boolean
-  loading?: boolean
-  newLabel?: string | null
+  id: string;
+  label: string;
+  path: string;
+  type: 'directory' | 'file';
+  size?: number;
+  children?: TreeNode[];
+  lazy?: boolean;
+  editable?: boolean;
+  loading?: boolean;
+  newLabel?: string | null;
 }
 
 const $q = useQuasar()
@@ -196,6 +203,21 @@ function getFullFileUrl (path: string): string {
   const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/')
 
   return `${BASE_FILE_URL}/${encodedPath}`
+}
+
+/**
+ * کپی آدرس کامل فایل به کلیپ‌بورد
+ */
+function copyFileUrl (path: string) {
+  const url = getFullFileUrl(path)
+  navigator.clipboard
+    .writeText(url)
+    .then(() => {
+      $q.notify({ type: 'positive', message: 'لینک فایل کپی شد' })
+    })
+    .catch(() => {
+      $q.notify({ type: 'negative', message: 'خطا در کپی لینک' })
+    })
 }
 
 /**
@@ -238,10 +260,7 @@ function formatSize (bytes: number): string {
 async function onLazyLoad ({ node, key, done, fail }: any) {
   try {
     const response = await fileAPI.browse(node.path)
-    const allItems = [
-      ...(response.directories || []),
-      ...(response.files || [])
-    ]
+    const allItems = [...(response.directories || []), ...(response.files || [])]
     const newChildren = mapApiToTreeNodes(allItems)
     done(newChildren)
   } catch (error) {
@@ -261,31 +280,23 @@ function onNodeSelected (key: string | string[] | null) {
   }
 }
 
-function onChangeEditable (node: {
-  editable?: boolean,
-  label: string,
-  newLabel: string
-}) {
+function onChangeEditable (node: { editable?: boolean; label: string; newLabel: string }) {
   node.editable = true
   node.newLabel = node.label
 }
 
-function cancelEdit (node: {
-  editable?: boolean,
-  label: string,
-  newLabel: string
-}) {
+function cancelEdit (node: { editable?: boolean; label: string; newLabel: string }) {
   node.editable = false
   node.newLabel = null
 }
 
 async function renameItem (node: {
-  editable?: boolean,
-  loading?: boolean,
-  label: string,
-  id: string,
-  newLabel: string,
-  path: string
+  editable?: boolean;
+  loading?: boolean;
+  label: string;
+  id: string;
+  newLabel: string;
+  path: string;
 }) {
   try {
     node.loading = true
@@ -307,14 +318,13 @@ async function renameItem (node: {
 }
 
 async function deleteItem (node: {
-  editable?: boolean,
-  loading?: boolean,
-  label: string,
-  id: string,
-  newLabel: string,
-  path: string
+  editable?: boolean;
+  loading?: boolean;
+  label: string;
+  id: string;
+  newLabel: string;
+  path: string;
 }) {
-
   $q.dialog({
     title: 'تأیید حذف',
     message: `آیا از حذف "${node.label}" مطمئن هستید؟`,
@@ -400,10 +410,7 @@ async function refreshDirectory (node: TreeNode) {
     await fileAPI.clearBrowseCache(node.path)
 
     const response = await fileAPI.browse(node.path)
-    const allItems = [
-      ...(response.directories || []),
-      ...(response.files || [])
-    ]
+    const allItems = [...(response.directories || []), ...(response.files || [])]
     const newChildren = mapApiToTreeNodes(allItems)
 
     replaceNodeChildren(treeNodes.value, node.path, newChildren)
@@ -438,10 +445,7 @@ onMounted(async () => {
   try {
     loading.value = true
     const response = await fileAPI.browse('/')
-    const allItems = [
-      ...(response.directories || []),
-      ...(response.files || [])
-    ]
+    const allItems = [...(response.directories || []), ...(response.files || [])]
     treeNodes.value = [createArchiveRoot(mapApiToTreeNodes(allItems))]
   } catch (error) {
     $q.notify({

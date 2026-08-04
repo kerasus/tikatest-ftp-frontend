@@ -103,9 +103,9 @@ function onClickLoginBtn () {
 }
 
 async function redirectAfterLogin () {
-  let defaultRoute = { name: 'Panel.Dashboard', params: {} }
+  let defaultRoute = { name: 'Panel.File.Browse', params: {} }
   if (userManager.isAdmin) {
-    defaultRoute = { name: 'Panel.Dashboard', params: {} }
+    defaultRoute = { name: 'Panel.File.Browse', params: {} }
   }
 
   const redirectLocation = appConfigManager.redirectAfterLogin || defaultRoute

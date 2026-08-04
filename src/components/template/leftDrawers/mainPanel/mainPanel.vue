@@ -56,11 +56,17 @@ type ListItemType = {
 };
 
 const topLinks = ref<ListItemType[]>([
+  // {
+  //   icon: 'dashboard',
+  //   title: 'داشبورد',
+  //   forRoles: [ 'admin' ],
+  //   route: { name: 'Panel.Dashboard' }
+  // },
   {
-    icon: 'dashboard',
-    title: 'داشبورد',
-    forRoles: [ 'admin' ],
-    route: { name: 'Panel.Dashboard' }
+    icon: 'group',
+    title: 'مشاهده فایل ها',
+    forRoles: [ 'admin', 'teacher' ],
+    route: { name: 'Panel.File.Browse' }
   },
   {
     icon: 'group',
@@ -76,14 +82,8 @@ const topLinks = ref<ListItemType[]>([
   },
   {
     icon: 'group',
-    title: 'مشاهده فایل ها',
-    forRoles: [ 'admin' ],
-    route: { name: 'Panel.File.Browse' }
-  },
-  {
-    icon: 'group',
     title: 'آپلود فایل',
-    forRoles: [ 'admin' ],
+    forRoles: [ 'admin', 'teacher' ],
     route: { name: 'Panel.File.Upload' }
   }
 ])
