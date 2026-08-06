@@ -25,7 +25,28 @@
             color="primary"
             flat
             icon="visibility"
-            :to="{ name: showRouteName, params: { id: inputData.props.row.id } }" />
+            :to="{ name: showRouteName, params: { id: inputData.props.row.id } }">
+            <q-tooltip>
+              مشاهده کاربر
+            </q-tooltip>
+          </q-btn>
+
+          <!-- مدیریت دسترسی‌های کاربر -->
+          <q-btn
+            v-if="isTeacher(inputData.props.row)"
+            color="secondary"
+            flat
+            icon="admin_panel_settings"
+            :to="{
+              name: 'Panel.User.Permissions',
+              params: {
+                id: inputData.props.row.id
+              }
+            }">
+            <q-tooltip>
+              مدیریت دسترسی‌ها
+            </q-tooltip>
+          </q-btn>
         </div>
       </template>
       <template v-else>
@@ -160,6 +181,10 @@ const inputs = ref([
   }
 ])
 const entityIndexRef = ref()
+
+function isTeacher (user: UserType): boolean {
+  return user.roles?.some((role) => role.name === 'teacher') ?? false
+}
 
 function afterRemove () {
   entityIndexRef.value.reload()

@@ -56,6 +56,22 @@ const routes: RouteRecordRaw[] = [
           ]
         },
         component: () => import('src/pages/panel/user/edit.vue')
+      },
+      {
+        path: ':id/permissions',
+        name: 'Panel.User.Permissions',
+        meta: {
+          breadCrumbs: [
+            {
+              label: 'لیست کاربران',
+              to: { name: 'Panel.User.List' }
+            },
+            {
+              label: 'دسترسی های کاربر'
+            }
+          ]
+        },
+        component: () => import('src/pages/panel/user/permissions.vue')
       }
     ]
   },
