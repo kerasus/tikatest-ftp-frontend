@@ -6,6 +6,7 @@
     </template>
     <q-tree
       v-else
+      v-model:expanded="expandedPaths"
       :nodes="treeNodes"
       node-key="path"
       label-key="label"
@@ -29,7 +30,8 @@
             :name="prop.node.type === 'directory' ? 'folder' : 'insert_drive_file'"
             :color="prop.node.type === 'directory' ? 'amber' : 'grey-7'"
             size="24px"
-            class="q-mr-sm" />
+            class="q-mr-sm"
+            @click.stop="toggleDirectory(prop.node)" />
           <q-btn
             v-if="prop.node.type === 'directory'"
             flat
@@ -172,6 +174,7 @@ interface TreeNode {
   size?: number;
   children?: TreeNode[];
   lazy?: boolean;
+  loaded?: boolean;
   editable?: boolean;
   loading?: boolean;
   newLabel?: string | null;
@@ -183,6 +186,7 @@ const fileAPI = new FileAPI()
 const treeNodes = ref<TreeNode[]>([])
 const loading = ref<boolean>(false)
 const selectedPath = ref<string | null>(null)
+const expandedPaths = ref<string[]>([])
 
 // متغیرهای مربوط به پخش کننده
 const showVideoDialog = ref(false)
@@ -244,7 +248,8 @@ function mapApiToTreeNodes (items: any[]): TreeNode[] {
       type: item.type,
       size: item.size,
       children: isDirectory ? [] : undefined,
-      lazy: isDirectory
+      lazy: isDirectory,
+      loaded: false
     }
   })
 }
@@ -257,21 +262,56 @@ function formatSize (bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-async function onLazyLoad ({ node, key, done, fail }: any) {
+async function loadDirectoryChildren (node: TreeNode): Promise<TreeNode[]> {
+  if (node.type !== 'directory') {
+    return []
+  }
+
+  if (node.loaded) {
+    return node.children || []
+  }
+
+  if (node.loading) {
+    return node.children || []
+  }
+
   try {
+    node.loading = true
+
     const response = await fileAPI.browse(node.path)
-    const allItems = [...(response.directories || []), ...(response.files || [])]
-    const newChildren = mapApiToTreeNodes(allItems)
-    done(newChildren)
+
+    const allItems = [
+      ...(response.directories || []),
+      ...(response.files || [])
+    ]
+
+    const children = mapApiToTreeNodes(allItems)
+
+    node.children = children
+    node.loaded = true
+    node.lazy = false
+
+    return children
+  } finally {
+    node.loading = false
+  }
+}
+
+async function onLazyLoad ({ node, done, fail }: any) {
+  try {
+    const children = await loadDirectoryChildren(node)
+    done(children)
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: 'خطا در دریافت لیست فایل‌ها',
       caption: error instanceof Error ? error.message : 'Unknown error'
     })
+
     fail()
   }
 }
+
 
 function onNodeSelected (key: string | string[] | null) {
   if (typeof key === 'string') {
@@ -410,8 +450,17 @@ async function refreshDirectory (node: TreeNode) {
     await fileAPI.clearBrowseCache(node.path)
 
     const response = await fileAPI.browse(node.path)
-    const allItems = [...(response.directories || []), ...(response.files || [])]
+
+    const allItems = [
+      ...(response.directories || []),
+      ...(response.files || [])
+    ]
+
     const newChildren = mapApiToTreeNodes(allItems)
+
+    node.children = newChildren
+    node.loaded = true
+    node.lazy = false
 
     replaceNodeChildren(treeNodes.value, node.path, newChildren)
 
@@ -437,7 +486,39 @@ function createArchiveRoot (children: TreeNode[] = []): TreeNode {
     path: '/',
     type: 'directory',
     children,
-    lazy: true
+    lazy: true,
+    loaded: true
+  }
+}
+
+async function toggleDirectory (node: TreeNode) {
+  if (node.type !== 'directory') {
+    return
+  }
+
+  const isExpanded = expandedPaths.value.includes(node.path)
+
+  if (isExpanded) {
+    expandedPaths.value = expandedPaths.value.filter(
+      (path) => path !== node.path
+    )
+
+    return
+  }
+
+  try {
+    await loadDirectoryChildren(node)
+
+    expandedPaths.value = [
+      ...expandedPaths.value,
+      node.path
+    ]
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: 'خطا در باز کردن پوشه',
+      caption: error instanceof Error ? error.message : 'Unknown error'
+    })
   }
 }
 

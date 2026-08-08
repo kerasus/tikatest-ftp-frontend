@@ -76,12 +76,6 @@ const topLinks = ref<ListItemType[]>([
   },
   {
     icon: 'group',
-    title: 'مجوزها',
-    forRoles: [ 'admin' ],
-    route: { name: 'Panel.Permission.List' }
-  },
-  {
-    icon: 'group',
     title: 'آپلود فایل',
     forRoles: [ 'admin', 'teacher' ],
     route: { name: 'Panel.File.Upload' }

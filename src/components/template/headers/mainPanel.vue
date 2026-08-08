@@ -60,6 +60,26 @@ function logout () {
   userManager.logout()
   router.push({ name: 'Auth.Login' })
 }
+
+function goToProfileEdit () {
+  const userId = userManager.me?.id
+
+  if (!userId) {
+    $q.notify({
+      type: 'negative',
+      message: 'شناسه کاربر یافت نشد'
+    })
+    return
+  }
+
+  router.push({
+    name: 'Panel.User.Edit',
+    params: {
+      id: userId
+    }
+  })
+}
+
 </script>
 
 <template>
@@ -119,34 +139,83 @@ function logout () {
             class="icon-button">
             <q-menu
               transition-show="jump-down"
-              transition-hide="jump-up">
-              <div class="profile-menu q-pa-md">
-                <q-avatar size="72px">
-                  <img
-                    src="/images/blankProfile.png"
-                    alt="avatar">
-                </q-avatar>
+              transition-hide="jump-up"
+              :offset="[0, 10]"
+              class="profile-menu-popup">
+              <div class="profile-menu">
+                <div class="profile-menu__header">
+                  <q-avatar
+                    size="76px"
+                    class="profile-menu__avatar">
+                    <img
+                      src="/images/blankProfile.png"
+                      alt="پروفایل کاربر">
+                  </q-avatar>
 
-                <div class="profile-menu-user-info text-subtitle1 q-mt-md q-mb-xs">
-                  <div class="profile-menu-user-fullname">
-                    <div class="labele text-center text-blue-grey-9">
+                  <div class="profile-menu__user-info">
+                    <div class="profile-menu__name">
                       {{ userManager.me?.firstname }}
                       {{ userManager.me?.lastname }}
                     </div>
-                  </div>
-                  <div class="profile-menu-user-roles text-blue-grey-7">
-                    ({{ userManager.me.roles.map(r=>translateRole(r.name)).join(', ') }})
+
+                    <div class="profile-menu__username">
+                      {{ userManager.me?.username || userManager.me?.email || '-' }}
+                    </div>
                   </div>
                 </div>
 
-                <q-btn
-                  v-close-popup
-                  color="red"
-                  icon="logout"
-                  class="logout-btn"
-                  @click="logout" />
+                <q-separator class="q-my-md" />
+
+                <div class="profile-menu__roles">
+                  <div class="profile-menu__section-title">
+                    نقش‌های کاربر
+                  </div>
+
+                  <div class="profile-menu__role-list">
+                    <q-chip
+                      v-for="role in userManager.me?.roles || []"
+                      :key="role.name"
+                      color="blue-1"
+                      text-color="primary"
+                      icon="verified_user"
+                      dense>
+                      {{ translateRole(role.name) }}
+                    </q-chip>
+
+                    <span
+                      v-if="!userManager.me?.roles?.length"
+                      class="text-grey-6 text-caption">
+                      نقشی ثبت نشده است
+                    </span>
+                  </div>
+                </div>
+
+                <q-separator class="q-my-md" />
+
+                <div class="profile-menu__actions">
+                  <q-btn
+                    v-close-popup
+                    unelevated
+                    no-caps
+                    color="primary"
+                    icon="manage_accounts"
+                    label="ویرایش پروفایل"
+                    class="profile-menu__edit-btn"
+                    @click="goToProfileEdit" />
+
+                  <q-btn
+                    v-close-popup
+                    outline
+                    no-caps
+                    color="negative"
+                    icon="logout"
+                    label="خروج از حساب"
+                    class="profile-menu__logout-btn"
+                    @click="logout" />
+                </div>
               </div>
             </q-menu>
+
           </q-btn>
           <q-btn
             v-else
@@ -233,25 +302,80 @@ function logout () {
   margin: 10px;
 }
 
+.profile-menu-popup {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(35, 48, 68, 0.16);
+}
+
 .profile-menu {
-  min-width: 200px;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  .q-avatar {
-  }
-  .profile-menu-user-info {
-    .profile-menu-user-fullname {
+  width: 290px;
+  padding: 20px;
+  direction: rtl;
+  background: $neutral-100;
 
-    }
-    .profile-menu-user-roles {
-
-    }
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
   }
-  .logout-btn {
+
+  &__avatar {
+    box-shadow: 0 5px 15px rgba(25, 118, 210, 0.2);
+    flex-shrink: 0;
+  }
+
+  &__user-info {
+    min-width: 0;
+    text-align: right;
+  }
+
+  &__name {
+    color: $color-text1;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.8;
+  }
+
+  &__username {
+    overflow: hidden;
+    color: $color-text2;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    direction: ltr;
+    text-align: right;
+  }
+
+  &__section-title {
+    margin-bottom: 8px;
+    color: $color-text2;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &__role-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  &__edit-btn,
+  &__logout-btn {
     width: 100%;
+    min-height: 42px;
+    border-radius: 10px;
+  }
+
+  &__edit-btn {
+    box-shadow: 0 5px 12px rgba(25, 118, 210, 0.18);
   }
 }
+
 </style>

@@ -1,7 +1,6 @@
 import userRoutes from './user'
 import type { RouteRecordRaw } from 'vue-router'
 import fileRoutes from './file'
-import permissionRoutes from './permission'
 import Authenticated from 'src/router/middleware/Authenticated'
 import hasOneOfThisRoles from 'src/router/middleware/hasOneOfThisRoles'
 
@@ -32,8 +31,7 @@ export const index: RouteRecordRaw[] = [
       },
 
       ...userRoutes,
-      ...fileRoutes,
-      ...permissionRoutes
+      ...fileRoutes
     ]
   },
 

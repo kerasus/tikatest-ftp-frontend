@@ -31,7 +31,9 @@
         </template>
       </entity-create>
     </div>
-    <div class="col-md-6 col-12">
+    <div
+      v-if="userManager.isAdmin"
+      class="col-md-6 col-12">
       <q-card>
         <q-card-section>
           <role-list
@@ -49,12 +51,14 @@
 import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useUser } from 'stores/user'
 import RoleList from 'src/components/roleList.vue'
 import { EntityEdit, EntityCreate } from 'quasar-crud'
 import UserAPI, { type UserType } from 'src/repositories/user'
 
 const $q = useQuasar()
 const route = useRoute()
+const userManager = useUser()
 const userAPI = new UserAPI()
 
 const entityCreateRef = ref()

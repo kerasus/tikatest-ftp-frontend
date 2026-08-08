@@ -20,6 +20,8 @@ export type FileTreeType = {
   files: FileType[];
 }
 
+type OptionsType = Record<string, Record<string, string[]>>
+
 export default class FileAPI extends BaseAPI<FileTreeType> {
   constructor () {
     super('/files')
@@ -47,9 +49,9 @@ export default class FileAPI extends BaseAPI<FileTreeType> {
     return response.data
   }
 
-  async getPptions (): Promise<any> {
+  async getOptions (): Promise<OptionsType> {
     const response = await this.getAxiosInstanceWithToken()
-      .get(this.endpoints.options())
+      .get<OptionsType>(this.endpoints.options())
 
     return response.data
   }
@@ -57,9 +59,6 @@ export default class FileAPI extends BaseAPI<FileTreeType> {
   async uploadChunk (formData: FormData, signal?: AbortSignal): Promise<any> {
     const response = await this.getAxiosInstanceWithToken()
       .post(this.endpoints.upload(), formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
         signal: signal
       })
     return response.data

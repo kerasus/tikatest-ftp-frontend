@@ -21,8 +21,9 @@ export interface ValidationError {
 }
 
 export interface ErrorResponse {
-  message: string;
-  errors: ValidationError;
+  message?: string;
+  success?: boolean;
+  errors?: ValidationError | string[] | null;
 }
 
 const apiServer = process.env.FRONTEND_API_BASE || '/api'
@@ -240,37 +241,38 @@ function getAxiosInstanceManager (apiServer: string) {
       if (error.response) {
         const { status, data } = error.response
 
-        if (!data.success) {
-          const errorMessage = data.message
-          const validationErrors = Object.entries((data as ErrorResponse).errors).flatMap(([_, messages]) => {
-            return messages // Only include the error messages, not the field names
-          })
-          notifyError(
-            (errorMessage ? errorMessage + '<br/>' : '') +
-            validationErrors.join('<br/>')
-          ) // Join all error messages with a semicolon
-        }
+        const responseData =
+          data && typeof data === 'object'
+            ? data as Partial<ErrorResponse> & {
+              errors?: Record<string, string[] | string>;
+            }
+            : {}
 
-        // // Handle 422 Unprocessable Entity (validation errors)
-        // if ((status === 422 || status === 400) && (data as ErrorResponse).errors) {
-        //   const validationErrors = Object.entries((data as ErrorResponse).errors).flatMap(([_, messages]) => {
-        //     return messages // Only include the error messages, not the field names
-        //   })
-        //   notifyError(validationErrors.join('<br/>')) // Join all error messages with a semicolon
-        // }
-        // else if (typeof data === 'string') {
-        //   notifyError(data)
-        // }
-        // // Handle other structured errors (e.g., detail array)
-        // else if (Array.isArray(data) && data.length > 0) {
-        //   notifyError(
-        //     data.join(', ')
-        //   )
-        // }
-        // // Handle generic HTTP status errors
-        // else {
-        //   notifyError(`error.${status}`)
-        // }
+        const errorMessage =
+          typeof responseData.message === 'string'
+            ? responseData.message
+            : `error.${status}`
+
+        const errors = responseData.errors
+
+        const validationErrors =
+          errors && typeof errors === 'object' && !Array.isArray(errors)
+            ? Object.entries(errors).flatMap(([, messages]) => {
+              if (Array.isArray(messages)) {
+                return messages.filter(
+                  (message): message is string => typeof message === 'string'
+                )
+              }
+
+              return typeof messages === 'string' ? [messages] : []
+            })
+            : []
+
+        notifyError(
+          [errorMessage, ...validationErrors]
+            .filter(Boolean)
+            .join('<br/>')
+        )
       }
       // Handle cases where there is no response (network error, etc.)
       else {

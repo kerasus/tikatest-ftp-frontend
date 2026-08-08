@@ -199,7 +199,13 @@ const optionsCacheClearing = ref(false)
 // --- Computed Properties برای ساخت لیست‌ها ---
 
 const seasonOptions = computed(() => {
-  return Object.keys(apiOptions.value).map((season) => ({
+  const options = apiOptions.value
+
+  if (!options || typeof options !== 'object') {
+    return []
+  }
+
+  return Object.keys(options).map((season) => ({
     label: season,
     value: season
   }))
@@ -254,16 +260,29 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-async function getPptions () {
+async function getOptions () {
   try {
     optionsLoading.value = true
-    const result = await fileAPI.getPptions()
-    // فرض بر این است که result.data شامل آبجکت JSON است
-    if (result) {
-      apiOptions.value = result
+    const result = await fileAPI.getOptions()
+
+    const options = result?.data ?? result ?? {}
+
+    if (
+      typeof options === 'object' &&
+      !Array.isArray(options)
+    ) {
+      apiOptions.value = options as OptionsType
+    } else {
+      apiOptions.value = {}
     }
   } catch (error) {
     console.error('Error fetching options:', error)
+    apiOptions.value = {}
+
+    $q.notify({
+      type: 'negative',
+      message: 'خطا در دریافت تنظیمات آپلود'
+    })
   } finally {
     optionsLoading.value = false
   }
@@ -293,6 +312,32 @@ async function cancelUpload () {
       position: 'top'
     })
   }
+}
+
+async function uploadChunkWithRetry (
+  formData: FormData,
+  signal: AbortSignal,
+  maxAttempts = 3
+) {
+  let lastError: unknown
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fileAPI.uploadChunk(formData, signal)
+    } catch (error) {
+      lastError = error
+
+      if (signal.aborted) {
+        throw error
+      }
+
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 2000))
+      }
+    }
+  }
+
+  throw lastError
 }
 
 /**
@@ -348,7 +393,22 @@ const handleUpload = async () => {
       formData.append('grade', grade)
       formData.append('chunk', chunkBlob)
 
-      const response = await fileAPI.uploadChunk(formData, signal)
+      // const response = await fileAPI.uploadChunk(formData, signal)
+      const response = await uploadChunkWithRetry(
+        formData,
+        signal,
+        3
+      )
+
+
+      if (!response || typeof response !== 'object') {
+        $q.notify({
+          type: 'negative',
+          message: 'پاسخ معتبر از سرور دریافت نشد.',
+          position: 'top'
+        })
+        throw new Error('پاسخ معتبر از سرور دریافت نشد.')
+      }
 
       uploadedBytes.value += chunkBlob.size
       // محاسبه درصد پیشرفت بر اساس بایت
@@ -361,20 +421,36 @@ const handleUpload = async () => {
 
       // اگر آپلود کامل شده بود
       if (response.complete) {
+        if (!response.file_info?.filename) {
+          $q.notify({
+            type: 'negative',
+            message: 'پاسخ تکمیل آپلود ناقص است.',
+            position: 'top'
+          })
+          throw new Error('پاسخ تکمیل آپلود ناقص است.')
+        }
+
         $q.notify({
           type: 'positive',
           message: `فایل ${response.file_info.filename} با موفقیت آپلود شد.`,
-          position: 'top'
+          position: 'top',
+          closeBtn: true,
+          timeout: 0
         })
         break // خروج از حلقه
       }
     }
   } catch (error: any) {
     if (error.message !== 'Upload cancelled by user') {
-      console.error('Upload Error:', error)
+      console.error('Upload Error:', {
+        chunkIndex: currentChunkIndex.value,
+        totalChunks: totalChunks.value,
+        uploadId: currentUploadId.value,
+        error
+      })
       $q.notify({
         type: 'negative',
-        message: error.message || 'خطا در آپلود فایل',
+        message: `آپلود تکه ${currentChunkIndex.value + 1} شکست خورد.` + error.message,
         position: 'top'
       })
     }
@@ -395,7 +471,7 @@ async function refreshOptionsCache () {
     selectedGrade.value = null
     apiOptions.value = {}
 
-    await getPptions()
+    await getOptions()
 
     $q.notify({
       type: 'positive',
@@ -416,6 +492,6 @@ async function refreshOptionsCache () {
 }
 
 onMounted(() => {
-  getPptions()
+  getOptions()
 })
 </script>
