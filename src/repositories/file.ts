@@ -20,16 +20,24 @@ export type FileTreeType = {
   files: FileType[];
 }
 
+export type MoveFileResponse = {
+  ok: boolean;
+  old_path: string;
+  new_path: string;
+}
+
 type OptionsType = Record<string, Record<string, string[]>>
 
 export default class FileAPI extends BaseAPI<FileTreeType> {
   constructor () {
     super('/files')
+
     this.defaultObject = {
       current_path: '',
       directories: [],
       files: []
     }
+
     this.endpoints = {
       ...this.endpoints,
       browse: () => `${this.baseEndpoint}/browse`,
@@ -37,12 +45,13 @@ export default class FileAPI extends BaseAPI<FileTreeType> {
       upload: () => `${this.baseEndpoint}/upload`,
       cancel: () => `${this.baseEndpoint}/cancel`,
       rename: () => `${this.baseEndpoint}/rename`,
+      move: () => `${this.baseEndpoint}/move`,
       clearBrowseCache: () => `${this.baseEndpoint}/cache/browse/clear`,
       clearOptionsCache: () => `${this.baseEndpoint}/cache/options/clear`
     }
   }
 
-  async browse (path: string|null): Promise<FileTreeType> {
+  async browse (path: string | null): Promise<FileTreeType> {
     const response = await this.getAxiosInstanceWithToken()
       .get(this.endpoints.browse(), { params: { path } })
 
@@ -56,11 +65,13 @@ export default class FileAPI extends BaseAPI<FileTreeType> {
     return response.data
   }
 
-  async uploadChunk (formData: FormData, signal?: AbortSignal): Promise<any> {
+  async uploadChunk (
+    formData: FormData,
+    signal?: AbortSignal
+  ): Promise<any> {
     const response = await this.getAxiosInstanceWithToken()
-      .post(this.endpoints.upload(), formData, {
-        signal: signal
-      })
+      .post(this.endpoints.upload(), formData, { signal })
+
     return response.data
   }
 
@@ -76,6 +87,19 @@ export default class FileAPI extends BaseAPI<FileTreeType> {
   }> {
     const response = await this.getAxiosInstanceWithToken()
       .patch(this.endpoints.rename(), { old_path: oldPath, new_name: newName })
+    return response.data
+  }
+
+  async move (
+    oldPath: string,
+    destinationPath: string
+  ): Promise<MoveFileResponse> {
+    const response = await this.getAxiosInstanceWithToken()
+      .post<MoveFileResponse>(this.endpoints.move(), {
+        old_path: oldPath,
+        destination_path: destinationPath
+      })
+
     return response.data
   }
 
