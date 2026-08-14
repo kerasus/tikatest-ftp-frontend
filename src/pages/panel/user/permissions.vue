@@ -261,6 +261,16 @@ const actions: {
     icon: 'edit'
   },
   {
+    value: 'rename', // اکشن جدید
+    label: 'تغییر نام',
+    icon: 'drive_file_rename_outline'
+  },
+  {
+    value: 'move',
+    label: 'انتقال',
+    icon: 'drive_file_move'
+  },
+  {
     value: 'delete',
     label: 'حذف',
     icon: 'delete'
@@ -472,6 +482,8 @@ function getActionColor (name: string): string {
     case 'read': return 'blue-7'
     case 'write': return 'orange-8'
     case 'delete': return 'red-8'
+    case 'rename': return 'cyan-8'
+    case 'move': return 'deep-purple-7'
     default: return 'grey-7'
   }
 }

@@ -8,7 +8,7 @@ export type PermissionType = {
   updated_at: string | null;
 }
 
-export type PermissionActionType = 'read' | 'write' | 'delete'
+export type PermissionActionType = 'read' | 'write' | 'rename' | 'move' | 'delete'
 
 export default class PermissionAPI extends BaseAPI<PermissionType> {
   constructor () {
