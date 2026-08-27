@@ -79,6 +79,12 @@ const topLinks = ref<ListItemType[]>([
     title: 'آپلود فایل',
     forRoles: [ 'admin', 'teacher' ],
     route: { name: 'Panel.File.Upload' }
+  },
+  {
+    icon: 'history',
+    title: 'گزارش فعالیت فایل‌ها',
+    forRoles: [ 'admin' ],
+    route: { name: 'Panel.FileActivityLog.List' }
   }
 ])
 
