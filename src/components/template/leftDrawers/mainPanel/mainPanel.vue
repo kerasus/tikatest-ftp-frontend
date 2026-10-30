@@ -64,6 +64,12 @@ const topLinks = ref<ListItemType[]>([
   // },
   {
     icon: 'group',
+    title: 'آپلود فایل',
+    forRoles: [ 'admin', 'teacher' ],
+    route: { name: 'Panel.File.Upload' }
+  },
+  {
+    icon: 'group',
     title: 'مشاهده فایل ها',
     forRoles: [ 'admin', 'teacher' ],
     route: { name: 'Panel.File.Browse' }
@@ -75,16 +81,16 @@ const topLinks = ref<ListItemType[]>([
     route: { name: 'Panel.User.List' }
   },
   {
-    icon: 'group',
-    title: 'آپلود فایل',
-    forRoles: [ 'admin', 'teacher' ],
-    route: { name: 'Panel.File.Upload' }
-  },
-  {
     icon: 'history',
     title: 'گزارش فعالیت فایل‌ها',
     forRoles: [ 'admin' ],
     route: { name: 'Panel.FileActivityLog.List' }
+  },
+  {
+    icon: 'school',
+    title: 'کلاس‌های سنجاد',
+    forRoles: [ 'admin' ],
+    route: { name: 'Panel.Classes.Sanjad' }
   }
 ])
 

@@ -2,6 +2,7 @@ import userRoutes from './user'
 import type { RouteRecordRaw } from 'vue-router'
 import fileRoutes from './file'
 import fileActivityLogRoutes from './fileActivityLog'
+import sanjadClassRoutes from './sanjadClass'
 import Authenticated from 'src/router/middleware/Authenticated'
 import hasOneOfThisRoles from 'src/router/middleware/hasOneOfThisRoles'
 
@@ -33,7 +34,8 @@ export const index: RouteRecordRaw[] = [
 
       ...userRoutes,
       ...fileRoutes,
-      ...fileActivityLogRoutes
+      ...fileActivityLogRoutes,
+      ...sanjadClassRoutes
     ]
   },
 
