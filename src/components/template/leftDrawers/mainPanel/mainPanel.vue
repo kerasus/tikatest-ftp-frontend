@@ -182,7 +182,7 @@ watch(currentRouteName, () => {
   z-index: 2;
 }
 .left-drawer {
-  background: $gray-100;
+  background: transparent;
   width: 100%;
   height: 100%;
   position: relative;
@@ -196,7 +196,7 @@ watch(currentRouteName, () => {
     background-color: transparent;
   }
   .left-drawer__inner {
-    background: $gray-100;
+    background: transparent;
     padding: $space-4 $space-2;
     border-radius: 0 $radius-6 $radius-6 0;
     width: 100%;

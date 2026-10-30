@@ -3,65 +3,70 @@
     class="main-layout"
     :view="appLayoutStore.layoutView">
     <q-no-ssr>
-      <q-header
-        v-if="appLayoutStore.layoutHeader"
-        :reveal="appLayoutStore.layoutHeaderReveal"
-        :elevated="appLayoutStore.layoutHeaderElevated"
-        :bordered="appLayoutStore.layoutHeaderBordered"
-        :class="appLayoutStore.headerCustomClass">
-        <header-component :floated="headerFloated" />
-      </q-header>
+      <div class="upload-universe">
+        <div class="glow-bg-orb orb-1" />
+        <div class="glow-bg-orb orb-2" />
 
-      <q-drawer
-        v-if="appLayoutStore.layoutLeftDrawer"
-        v-model="appLayoutStore.layoutLeftDrawerVisible"
-        :overlay="appLayoutStore.layoutLeftDrawerOverlay"
-        :elevated="appLayoutStore.layoutLeftDrawerElevated"
-        :bordered="appLayoutStore.layoutLeftDrawerBordered"
-        :class="appLayoutStore.layoutLeftDrawerCustomClass"
-        :mini="appLayoutStore.layoutLeftDrawerMini"
-        :mini-width="appLayoutStore.layoutLeftDrawerMiniWidth"
-        :mini-to-overlay="appLayoutStore.layoutLeftDrawerMiniToOverlay"
-        :behavior="appLayoutStore.layoutLeftDrawerBehavior"
-        :width="appLayoutStore.layoutLeftDrawerWidth"
-        :show-if-above="appLayoutStore.layoutLeftDrawerShowIfAbove"
-        side="left"
-        class="main-layout__left-drawer">
-        <left-drawer-component />
-      </q-drawer>
+        <q-header
+          v-if="appLayoutStore.layoutHeader"
+          :reveal="appLayoutStore.layoutHeaderReveal"
+          :elevated="appLayoutStore.layoutHeaderElevated"
+          :bordered="appLayoutStore.layoutHeaderBordered"
+          :class="appLayoutStore.headerCustomClass">
+          <header-component :floated="headerFloated" />
+        </q-header>
 
-      <q-drawer
-        v-if="appLayoutStore.layoutRightDrawer"
-        v-model="appLayoutStore.layoutRightDrawerVisible"
-        :overlay="appLayoutStore.layoutRightDrawerOverlay"
-        :elevated="appLayoutStore.layoutRightDrawerElevated"
-        :bordered="appLayoutStore.layoutRightDrawerBordered"
-        :class="appLayoutStore.rightDrawerCustomClass"
-        :behavior="appLayoutStore.layoutRightDrawerBehavior"
-        :width="appLayoutStore.rightDrawerWidth"
-        :show-if-above="appLayoutStore.layoutRightDrawerShowIfAbove"
-        side="right"
-        class="main-layout__right-drawer">
-        <right-drawer-component />
-      </q-drawer>
+        <q-drawer
+          v-if="appLayoutStore.layoutLeftDrawer"
+          v-model="appLayoutStore.layoutLeftDrawerVisible"
+          :overlay="appLayoutStore.layoutLeftDrawerOverlay"
+          :elevated="appLayoutStore.layoutLeftDrawerElevated"
+          :bordered="appLayoutStore.layoutLeftDrawerBordered"
+          :class="appLayoutStore.layoutLeftDrawerCustomClass"
+          :mini="appLayoutStore.layoutLeftDrawerMini"
+          :mini-width="appLayoutStore.layoutLeftDrawerMiniWidth"
+          :mini-to-overlay="appLayoutStore.layoutLeftDrawerMiniToOverlay"
+          :behavior="appLayoutStore.layoutLeftDrawerBehavior"
+          :width="appLayoutStore.layoutLeftDrawerWidth"
+          :show-if-above="appLayoutStore.layoutLeftDrawerShowIfAbove"
+          side="left"
+          class="main-layout__left-drawer">
+          <left-drawer-component />
+        </q-drawer>
 
-      <q-page-container>
-        <q-page
-          v-scroll="onContentInsideScroll"
-          :style-fn="myTweak">
-          <router-view />
-        </q-page>
-      </q-page-container>
+        <q-drawer
+          v-if="appLayoutStore.layoutRightDrawer"
+          v-model="appLayoutStore.layoutRightDrawerVisible"
+          :overlay="appLayoutStore.layoutRightDrawerOverlay"
+          :elevated="appLayoutStore.layoutRightDrawerElevated"
+          :bordered="appLayoutStore.layoutRightDrawerBordered"
+          :class="appLayoutStore.rightDrawerCustomClass"
+          :behavior="appLayoutStore.layoutRightDrawerBehavior"
+          :width="appLayoutStore.rightDrawerWidth"
+          :show-if-above="appLayoutStore.layoutRightDrawerShowIfAbove"
+          side="right"
+          class="main-layout__right-drawer">
+          <right-drawer-component />
+        </q-drawer>
 
-      <q-footer
-        v-if="appLayoutStore.layoutFooter"
-        ref="footerRef"
-        :reveal="appLayoutStore.layoutFooterReveal"
-        :elevated="appLayoutStore.layoutFooterElevated"
-        :bordered="appLayoutStore.layoutFooterBordered"
-        :class="appLayoutStore.footerCustomClass">
-        <footer-component />
-      </q-footer>
+        <q-page-container>
+          <q-page
+            v-scroll="onContentInsideScroll"
+            :style-fn="myTweak">
+            <router-view />
+          </q-page>
+        </q-page-container>
+
+        <q-footer
+          v-if="appLayoutStore.layoutFooter"
+          ref="footerRef"
+          :reveal="appLayoutStore.layoutFooterReveal"
+          :elevated="appLayoutStore.layoutFooterElevated"
+          :bordered="appLayoutStore.layoutFooterBordered"
+          :class="appLayoutStore.footerCustomClass">
+          <footer-component />
+        </q-footer>
+      </div>
     </q-no-ssr>
   </q-layout>
 </template>
@@ -171,6 +176,34 @@ onUnmounted(() => {
 .main-layout {
   background: $color-background;
   min-height: 100vh;
+  .upload-universe {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  /* کره‌های رنگی معلق در پس‌زمینه برای عمق‌بخشی */
+  .glow-bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .orb-1 {
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, #6366f1, #3b82f6);
+    top: -40px;
+    right: -50px;
+  }
+  .orb-2 {
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, #ec4899, #8b5cf6);
+    bottom: -60px;
+    left: -80px;
+  }
   :deep(.q-drawer-container) {
     .q-drawer--right {
       .q-layout__shadow {
@@ -198,7 +231,6 @@ onUnmounted(() => {
   .q-page {
     display: flex;
     flex-direction: column;
-    padding: $space-4;
   }
 }
 </style>

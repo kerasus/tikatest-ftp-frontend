@@ -134,14 +134,14 @@ $q-field__label_margin_bottom: $space-1;
           order: 1;
           transition: 200ms;
           transition-timing-function: linear;
-          color: $color-text3;
+          color: $color-text2;
           max-width: 100%;
           //transform: translateY(calc(-100% - #{$q-field__label_margin_bottom})) scale(1);
           // transform: translateY(-50%) translateX($space-1) scale(1);
           position: absolute;
           top: 0;
           z-index: 1;
-          background: $color-surface;
+          background: transparent;
           padding: 0 $space-1;
           @include typo-body-3;
         }
@@ -192,7 +192,7 @@ $q-field__label_margin_bottom: $space-1;
           .q-field__label {
             top: 0;
             left: $space-3;
-            transform: translateY(-50%) scale(1);
+            transform: translateY(-100%) scale(1);
             @include typo-body-4;
           }
           .q-field__native::placeholder {
